@@ -21,24 +21,36 @@ router.get('/soilprofiles', fetchuser, async (req, res) => {
 
 // ROUTE-2: Add a new profile using: POST "/api/notes/addprofile". login required
 router.post('/addsoilprofile', fetchuser, async (req, res) => {
-    //taking out from body
     try {
-        const result = validationResult(req);
-        if (!result.isEmpty()) {
-            return res.send({ errors: result.array() });
-        }
+        // Destructure fields from req.body
         const { name, nitrogen, potasium, phosphorous, tempreature, humidity, ph, rainfall, moisture, soiltype } = req.body;
+
+        // Create a new instance of Soilprofile model
         const soilprofile = new Soilprofile({
-            name, user: req.user.id, nitrogen, potasium, phosphorous, tempreature, humidity, ph, rainfall, moisture, soiltype
-        })
-        const savedprofile = await soilprofile.save()
+            name,
+            nitrogen,
+            potasium,
+            phosphorous,
+            tempreature,
+            humidity,
+            ph,
+            rainfall,
+            moisture,
+            soiltype,
+            user: req.user.id // Assuming user ID is required
+        });
+
+        // Save the profile to the database
+        const savedprofile = await soilprofile.save();
+
+        // Respond with the saved profile
         res.json(savedprofile);
     } catch (error) {
-        // If an error occurs during fetching the profiles, respond with an error message.
-        console.log(error)
-        res.status(500).json(error);
+        console.error(error);
+        res.status(500).json({ error: "Server Error" });
     }
-})
+});
+
 
 // ROUTE-3: update an existing profile using: PUT "/api/notes/updateprofile". login required
 
@@ -119,8 +131,5 @@ router.delete('/deleteprofile/:id', fetchuser, async (req, res) => {
         res.status(500).json({ error: 'Failed to delete the profile', });
     }
 })
-
-
-
 
 module.exports = router;
